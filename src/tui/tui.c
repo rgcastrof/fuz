@@ -53,6 +53,7 @@ run(Term *t, Vector *entry, char *entry_buffer)
 	Vector matches;
 	vector_init(&matches);
 	size_t chosen_offset = 0;
+	int entries_fill_term = 0;
 
 	while (true) {
 		getmaxyx(stdscr, t->rows, t->cols);
@@ -61,8 +62,16 @@ run(Term *t, Vector *entry, char *entry_buffer)
 		matches.size = 0;
 		get_matches(entry, &matches, entry_buffer, input);
 
-		if (selected >= t->rows - 3) selected = 0;
-		if (selected < 0) selected = t->rows - 4;
+		if (t->rows >= matches.size) {
+			if (selected < 0) selected = matches.size - 1;
+			if (selected > matches.size - 1 && entries_fill_term) selected = matches.size - 1;
+			if (selected > matches.size - 1 && !entries_fill_term) selected = 0;
+			entries_fill_term = 0;
+		} else {
+			if (selected < 0) selected = t->rows - 4;
+			if (selected > t->rows - 4) selected = 0;
+			entries_fill_term = 1;
+		}
 
 		for (int i = 0; i < matches.size; i++) {
 			size_t offset = VECTOR_GET(matches, i);
