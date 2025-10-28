@@ -1,5 +1,4 @@
 #include <ctype.h>
-#include <ncurses.h>
 #include <string.h>
 
 #include "tui.h"
@@ -13,11 +12,16 @@ init_term(Term *t)
 		perror("Error: failed to open /dev/tty as input.\n");
 		return 0;
 	}
+	t->tty_out = fopen("/dev/tty", "w");
+	if (!t->tty_out) {
+		perror("Error: failed to open /dev/tty as output.\n");
+		return 0;
+	}
 
 	t->term_type = getenv("TERM");
 	if (t->term_type == NULL)
 		t->term_type = "unknown";  /* fallback */
-	t->main_scr = newterm(t->term_type, stdout, t->tty_in);
+	t->main_scr = newterm(t->term_type, t->tty_out, t->tty_in);
 	if (!t->main_scr) {
 		perror("Error: failed to initialize newterm");
 		fclose(t->tty_in);

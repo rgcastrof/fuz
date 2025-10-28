@@ -7,6 +7,7 @@
 typedef struct Term {
 	SCREEN *main_scr;
 	FILE *tty_in;
+	FILE *tty_out;
 	char *term_type;
 	int rows;
 	int cols;
