@@ -40,6 +40,8 @@ setup(Term *t)
 	noecho();
 	cbreak();
 	keypad(stdscr, TRUE);
+	start_color();
+	init_pair(2, COLOR_BLACK, COLOR_YELLOW);
 }
 
 size_t
@@ -65,11 +67,14 @@ run(Term *t, Vector *entry, char *entry_buffer)
 		for (int i = 0; i < matches.size; i++) {
 			size_t offset = VECTOR_GET(matches, i);
 			if (i == selected) {
+				attron(COLOR_PAIR(2));
 				mvprintw(t->rows - i - 4, 0, "%s", entry_buffer + offset);
+				attroff(COLOR_PAIR(2));
 			} else {
 				mvprintw(t->rows - i - 4, 0, "%s", entry_buffer + offset);
 			}
 		}
+		mvprintw(t->rows - 2, 0, "%zu", matches.size);
 		mvprintw(t->rows - 1, 0, "> %s", input);
 		move(t->rows - 1, 2 + strlen(input));
 		refresh();
