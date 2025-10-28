@@ -42,23 +42,32 @@ setup(Term *t)
 	keypad(stdscr, TRUE);
 }
 
-void
-run(Term *t, Vector *entry)
+size_t
+run(Term *t, Vector *entry, char *entry_buffer)
 {
-	Vector *matches = NULL;
 	char input[100] = "";
 	size_t len;
-	int ch;
+	int ch, selected = 0;
+	Vector matches;
+	vector_init(&matches);
+	size_t chosen_offset = 0;
 
 	while (true) {
 		getmaxyx(stdscr, t->rows, t->cols);
 		clear();
 
-		matches = get_matches(entry, input);
-		if (matches != NULL) {
-			for (int i = 0; i < matches->size; i++) {
-				if (matches->data[i] != NULL)
-					mvprintw(t->rows - i - 3, 0, "%s", matches->data[i]);
+		matches.size = 0;
+		get_matches(entry, &matches, entry_buffer, input);
+
+		if (selected >= t->rows - 3) selected = 0;
+		if (selected < 0) selected = t->rows - 4;
+
+		for (int i = 0; i < matches.size; i++) {
+			size_t offset = VECTOR_GET(matches, i);
+			if (i == selected) {
+				mvprintw(t->rows - i - 4, 0, "%s", entry_buffer + offset);
+			} else {
+				mvprintw(t->rows - i - 4, 0, "%s", entry_buffer + offset);
 			}
 		}
 		mvprintw(t->rows - 1, 0, "> %s", input);
@@ -66,8 +75,14 @@ run(Term *t, Vector *entry)
 		refresh();
 
 		ch = getch();
-		if (ch == '\n')
+		if (ch == '\n') {
+			chosen_offset = VECTOR_GET(matches, selected);
 			break;
+		}
+
+		if (ch == KEY_UP) selected++;
+		if (ch == KEY_DOWN) selected--;
+		refresh();
 
 		len = strlen(input);
 		if (ch == KEY_BACKSPACE || ch == 127 || ch == 8) {
@@ -79,20 +94,16 @@ run(Term *t, Vector *entry)
 			input[len + 1] = '\0';
 		}
 	}
+	cleanup(t, matches.items);
+	return chosen_offset;
 }
 
 void
-load_curses(Term *t, Vector *entry)
+cleanup(Term *t, void *items)
 {
-	setup(t);
-	run(t, entry);
-}
-
-void
-cleanup(Term *t, Vector *entry)
-{
+	free(items);
 	endwin();
 	delscreen(t->main_scr);
 	fclose(t->tty_in);
-	destroy_vector(entry);
+	fclose(t->tty_out);
 }

@@ -14,8 +14,7 @@ typedef struct Term {
 } Term;
 
 void setup(Term *t);
-void run(Term *t, Vector *entry);
-void load_curses(Term *t, Vector *entry);
-void cleanup(Term *t, Vector *entry);
+size_t run(Term *t, Vector *entry, char *entry_buffer);
+void cleanup(Term *t, void *items);
 
 #endif
