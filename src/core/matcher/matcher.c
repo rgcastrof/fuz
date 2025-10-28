@@ -1,14 +1,13 @@
 #include <string.h>
 #include "matcher.h"
 
-Vector *
-get_matches(Vector *entry, char *input)
+void
+get_matches(Vector *offsets, Vector *matches, char *entry_buffer, char *input)
 {
-	Vector *matches = create_vector();
-	for (int i = 0; i < entry->size; i++) {
-		if (strstr(entry->data[i], input)) {
-			vector_push_back(matches, entry->data[i]);
+	for (size_t i = 0; i < offsets->size; i++) {
+		size_t offset = VECTOR_GET(*offsets, i);
+		if (strstr(entry_buffer + offset, input)) {
+			vector_push_back(matches, offset);
 		}
 	}
-	return matches;
 }

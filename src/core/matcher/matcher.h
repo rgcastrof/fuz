@@ -3,5 +3,5 @@
 
 #include "../../vector/vector.h"
 
-Vector *get_matches(Vector *entry, char *input);
+void get_matches(Vector *offsets, Vector *matches, char *entry_buffer, char *input);
 #endif
