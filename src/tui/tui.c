@@ -74,10 +74,9 @@ run(Term *t, Vector *entry, char *entry_buffer)
 				mvprintw(t->rows - i - 4, 0, "%s", entry_buffer + offset);
 			}
 		}
-		mvprintw(t->rows - 2, 0, "%zu", matches.size);
+		mvprintw(t->rows - 2, 0, "%zu/%zu", matches.size, entry->size);
 		mvprintw(t->rows - 1, 0, "> %s", input);
 		move(t->rows - 1, 2 + strlen(input));
-		refresh();
 
 		ch = getch();
 		if (ch == '\n') {
