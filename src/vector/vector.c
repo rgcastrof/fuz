@@ -1,49 +1,41 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "vector.h"
 
-Vector
-*create_vector()
-{
-	Vector *v = malloc(sizeof(Vector));
-	v->size = 0;
-	v->capacity = 1;
-	v->data = malloc(sizeof(char*) * v->capacity);
-	return v;
-}
-
 void
-destroy_vector(Vector *v)
+vector_init(Vector *v)
 {
-	for (int i = 0; i < v->size; i++) {
-		free(v->data[i]);
+	v->size = 0;
+	v->capacity = 128;
+	v->items = malloc(v->capacity * sizeof(size_t));
+	if (!v->items) {
+		perror("malloc failed");
+		exit(EXIT_FAILURE);
 	}
-	free(v->data);
-	free(v);
 }
 
-int
-vector_resize(Vector *v, size_t new_capacity)
+static int
+vector_resize(Vector *v, size_t newcap)
 {
-	char **new_data = realloc(v->data, new_capacity * sizeof(char*));
-	if (!new_data)
+	size_t *tmp = realloc(v->items, newcap * sizeof(size_t));
+	if (!tmp)
 		return 0;
-
-	v->data = new_data;
-	v->capacity = new_capacity;
+	v->items = tmp;
+	v->capacity = newcap;
 	return 1;
 }
 
 int
-vector_push_back(Vector *v, const char *item)
+vector_push_back(Vector *v, size_t value)
 {
 	if (v->size == v->capacity) {
-		if (!vector_resize(v, MAX(1, 2*v->capacity)))
+		if (!vector_resize(v, v->capacity * 2)) {
+			perror("Error: falied to realloc vector");
 			return 0;
+		}
 	}
-
-	v->data[v->size] = strdup(item);
-	v->size++;
+	v->items[v->size++] = value;
 	return 1;
 }
